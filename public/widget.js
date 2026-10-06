@@ -1,7 +1,7 @@
 /* Embodied Philosophy support chat widget.
    Embed on any page with:
    <script src="https://YOUR-DEPLOYMENT/widget.js" defer></script>
-   Optional attributes: data-color="#2E2A4F" data-title="Embodied Philosophy" */
+   Optional attributes: data-color="#2E2A4F" data-title="Ether" */
 (function () {
   if (window.__epChatLoaded) return;
   window.__epChatLoaded = true;
@@ -9,9 +9,9 @@
   var script = document.currentScript;
   var base = script ? new URL(script.src).origin : "";
   var color = (script && script.getAttribute("data-color")) || "#2E2A4F";
-  var title = (script && script.getAttribute("data-title")) || "Embodied Philosophy";
+  var title = (script && script.getAttribute("data-title")) || "Ether";
   var KEY = "ep-chat-v1";
-  var GREETING = "Hi, I'm Embodied Philosophy's AI assistant. I can help with course access, recordings, memberships, refunds and more. If I can't help, I'll pass you to Ichha on our support team. What can I help you with?";
+  var GREETING = "Hi, I'm Ether, Embodied Philosophy's AI assistant. I can help with course access, recordings, memberships, refunds and more. If I can't help, I'll pass you to Ichha on our support team. What can I help you with?";
 
   var state = { open: false, busy: false, messages: [] };
   try {
@@ -52,9 +52,9 @@
     '.send:disabled{opacity:.5;cursor:default}' +
     '@media (max-width:480px){.panel{right:8px;left:8px;width:auto;bottom:80px;height:calc(100vh - 100px)}}' +
     '</style>' +
-    '<button class="btn" aria-label="Open support chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>' +
+    '<button class="btn" aria-label="Chat with Ether"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>' +
     '<div class="panel" role="dialog" aria-label="Support chat">' +
-    '<div class="head"><div><b></b><small>AI assistant · Ichha from support can step in</small></div><button class="x" aria-label="Close chat">×</button></div>' +
+    '<div class="head"><div><b></b><small>Embodied Philosophy’s AI assistant</small></div><button class="x" aria-label="Close chat">×</button></div>' +
     '<div class="log" aria-live="polite"></div>' +
     '<div class="note">AI assistant. Please don\'t share card or password details.</div>' +
     '<form><textarea placeholder="Type your question…" aria-label="Message"></textarea><button class="send" type="submit">Send</button></form>' +
