@@ -1,5 +1,6 @@
 import { systemPrompt, TOOLS } from "../../../lib/prompt";
 import { createHandoffTicket } from "../../../lib/zendesk";
+import { getVercelOidcToken } from "@vercel/oidc";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,22 +40,32 @@ function json(req, data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", ...corsHeaders(req) } });
 }
 
+// Claude is reached through Vercel AI Gateway by default (billed to the Vercel team, no API key needed).
+// Set LLM_PROVIDER=anthropic to call the Anthropic API directly with ANTHROPIC_API_KEY instead.
+const PROVIDER = process.env.LLM_PROVIDER || "gateway";
+const GATEWAY_MODEL = process.env.GATEWAY_MODEL || "anthropic/claude-sonnet-5.5";
+
 async function callClaude(messages) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const gateway = PROVIDER === "gateway";
+  const headers = { "content-type": "application/json", "anthropic-version": "2023-06-01" };
+  if (gateway) {
+    const token = process.env.AI_GATEWAY_API_KEY || (await getVercelOidcToken());
+    headers.authorization = `Bearer ${token}`;
+  } else {
+    headers["x-api-key"] = process.env.ANTHROPIC_API_KEY;
+  }
+  const url = gateway ? "https://ai-gateway.vercel.sh/v1/messages" : "https://api.anthropic.com/v1/messages";
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({ model: MODEL, max_tokens: 700, system: systemPrompt(), tools: TOOLS, messages }),
+    headers,
+    body: JSON.stringify({ model: gateway ? GATEWAY_MODEL : MODEL, max_tokens: 700, system: systemPrompt(), tools: TOOLS, messages }),
   });
-  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) throw new Error(`${gateway ? "Gateway" : "Anthropic"} ${res.status}: ${(await res.text()).slice(0, 300)}`);
   return res.json();
 }
 
 export async function POST(req) {
-  if (!process.env.ANTHROPIC_API_KEY) return json(req, { error: "not_configured" }, 500);
+  if ((process.env.LLM_PROVIDER || "gateway") === "anthropic" && !process.env.ANTHROPIC_API_KEY) return json(req, { error: "not_configured" }, 500);
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
   if (rateLimited(ip)) return json(req, { error: "rate_limited" }, 429);
 
